@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 160 30% 8%;
+    --foreground: 45 30% 96%;
+
+    --card: 160 25% 12%;
+    --card-foreground: 45 30% 96%;
+
+    --popover: 160 25% 12%;
+    --popover-foreground: 45 30% 96%;
+
+    --primary: 160 50% 35%;
+    --primary-foreground: 45 30% 96%;
+
+    --secondary: 45 70% 55%;
+    --secondary-foreground: 160 30% 8%;
+
+    --muted: 160 20% 18%;
+    --muted-foreground: 45 20% 70%;
+
+    --accent: 45 80% 60%;
+    --accent-foreground: 160 30% 8%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 45 30% 96%;
+
+    --border: 160 20% 25%;
+    --input: 160 20% 20%;
+    --ring: 45 70% 55%;
+
+    --radius: 1rem;
+
+    /* Custom tasbih tokens */
+    --gold: 45 80% 55%;
+    --gold-glow: 45 90% 65%;
+    --emerald: 160 50% 35%;
+    --emerald-deep: 160 40% 20%;
+    --overlay: 160 30% 5% / 0.7;
+    --glass: 160 30% 15% / 0.6;
+    --counter-bg: 160 30% 10% / 0.85;
+
+    --sidebar-background: 160 25% 10%;
+    --sidebar-foreground: 45 30% 90%;
+    --sidebar-primary: 160 50% 35%;
+    --sidebar-primary-foreground: 45 30% 96%;
+    --sidebar-accent: 160 25% 18%;
+    --sidebar-accent-foreground: 45 30% 96%;
+    --sidebar-border: 160 20% 25%;
+    --sidebar-ring: 45 70% 55%;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-xl bg-card/60 border border-border/30 shadow-2xl;
+  }
+
+  .gold-glow {
+    text-shadow: 0 0 30px hsl(var(--gold) / 0.5), 0 0 60px hsl(var(--gold) / 0.3);
+  }
+
+  .counter-pulse {
+    animation: pulse-glow 0.3s ease-out;
+  }
+
+  @keyframes pulse-glow {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 hsl(var(--gold) / 0.6);
+    }
+    50% {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px 10px hsl(var(--gold) / 0.3);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 hsl(var(--gold) / 0);
+    }
+  }
+
+  @keyframes count-bump {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.15);
+    }
+  }
+
+  .count-animate {
+    animation: count-bump 0.2s ease-out;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
+  }
+
+  .shimmer-gold {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--gold)) 0%,
+      hsl(var(--gold-glow)) 50%,
+      hsl(var(--gold)) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s linear infinite;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
