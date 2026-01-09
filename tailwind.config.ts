@@ -2,7 +2,12 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -50,6 +55,7 @@ export default {
         gold: {
           DEFAULT: "hsl(var(--gold))",
           glow: "hsl(var(--gold-glow))",
+          muted: "hsl(var(--gold-muted))",
         },
         emerald: {
           DEFAULT: "hsl(var(--emerald))",
@@ -70,6 +76,11 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        serif: ["Playfair Display", "serif"],
+        sans: ["Inter", "sans-serif"],
+        arabic: ["Amiri", "serif"],
       },
       keyframes: {
         "accordion-down": {

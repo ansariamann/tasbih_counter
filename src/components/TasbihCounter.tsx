@@ -1,27 +1,33 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { RotateCcw, Minus, Plus } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import TasbihSettings from "./TasbihSettings";
 
 // Create a gentle pop/tap sound using Web Audio API
 const playClickSound = (audioContext: AudioContext | null) => {
   if (!audioContext) return;
-  
+
   // Main tap sound
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
-  
+
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
-  
+
   // Short pop sound
   oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.04);
-  
+  oscillator.frequency.exponentialRampToValueAtTime(
+    150,
+    audioContext.currentTime + 0.04
+  );
+
   gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
-  
+  gainNode.gain.exponentialRampToValueAtTime(
+    0.001,
+    audioContext.currentTime + 0.05
+  );
+
   oscillator.start(audioContext.currentTime);
   oscillator.stop(audioContext.currentTime + 0.05);
 };
@@ -29,32 +35,38 @@ const playClickSound = (audioContext: AudioContext | null) => {
 // Create a gentle chime sound for completion
 const playChimeSound = (audioContext: AudioContext | null) => {
   if (!audioContext) return;
-  
+
   // Play a sequence of pleasant tones
   const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5 - major chord
-  
+
   frequencies.forEach((freq, index) => {
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    
+
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    
+
     oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + index * 0.15);
-    
+    oscillator.frequency.setValueAtTime(
+      freq,
+      audioContext.currentTime + index * 0.15
+    );
+
     const startTime = audioContext.currentTime + index * 0.15;
     gainNode.gain.setValueAtTime(0, startTime);
     gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
     gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.8);
-    
+
     oscillator.start(startTime);
     oscillator.stop(startTime + 0.8);
   });
 };
 
 const TasbihCounter = () => {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(() => {
+    const saved = localStorage.getItem("tasbih-count");
+    return saved ? parseInt(saved, 10) : 0;
+  });
   const [target, setTarget] = useState(() => {
     const saved = localStorage.getItem("tasbih-target");
     return saved ? parseInt(saved, 10) : 100;
@@ -68,19 +80,26 @@ const TasbihCounter = () => {
     const saved = localStorage.getItem("tasbih-sound");
     return saved !== "false";
   });
-  const [vibrationStrength, setVibrationStrength] = useState<"off" | "light" | "medium" | "strong">(() => {
-    const saved = localStorage.getItem("tasbih-vibration-strength");
-    return (saved as "off" | "light" | "medium" | "strong") || "medium";
+  const [vibrationEnabled, setVibrationEnabled] = useState(() => {
+    const saved = localStorage.getItem("tasbih-vibration");
+    return saved !== "false";
   });
   const [totalCount, setTotalCount] = useState(() => {
     const saved = localStorage.getItem("tasbih-total");
     return saved ? parseInt(saved, 10) : 0;
   });
-  
+  const [resetClickCount, setResetClickCount] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const animationTimeoutRef = useRef<number | null>(null);
+  const resetTimeoutRef = useRef<number | null>(null);
 
   // Persist settings
+  useEffect(() => {
+    localStorage.setItem("tasbih-count", count.toString());
+  }, [count]);
+
   useEffect(() => {
     localStorage.setItem("tasbih-total", totalCount.toString());
   }, [totalCount]);
@@ -90,8 +109,8 @@ const TasbihCounter = () => {
   }, [soundEnabled]);
 
   useEffect(() => {
-    localStorage.setItem("tasbih-vibration-strength", vibrationStrength);
-  }, [vibrationStrength]);
+    localStorage.setItem("tasbih-vibration", vibrationEnabled.toString());
+  }, [vibrationEnabled]);
 
   useEffect(() => {
     localStorage.setItem("tasbih-target", target.toString());
@@ -103,66 +122,65 @@ const TasbihCounter = () => {
 
   const ensureAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
     }
     return audioContextRef.current;
   }, []);
 
   // Track previous completion state to play chime only once
   const prevIsCompleteRef = useRef(false);
-  
+
   const progress = Math.min((count / target) * 100, 100);
   const isComplete = count >= target;
 
   // Play chime when completing
-  // Get vibration duration based on strength
-  const getVibrationDuration = useCallback(() => {
-    switch (vibrationStrength) {
-      case "light": return 25;
-      case "medium": return 50;
-      case "strong": return 100;
-      default: return 0;
-    }
-  }, [vibrationStrength]);
-
   useEffect(() => {
     if (isComplete && !prevIsCompleteRef.current && soundEnabled) {
       const ctx = ensureAudioContext();
       playChimeSound(ctx);
       // Vibrate on completion
-      if (vibrationStrength !== "off" && navigator.vibrate) {
-        const duration = getVibrationDuration();
-        navigator.vibrate([duration * 2, 50, duration * 2, 50, duration * 4]);
+      if (vibrationEnabled && navigator.vibrate) {
+        navigator.vibrate([100, 50, 100, 50, 200]);
       }
     }
     prevIsCompleteRef.current = isComplete;
-  }, [isComplete, soundEnabled, vibrationStrength, getVibrationDuration, ensureAudioContext]);
+  }, [
+    isComplete,
+    soundEnabled,
+    vibrationEnabled,
+    ensureAudioContext,
+  ]);
 
   const increment = useCallback(() => {
     // Clear any pending animation timeout
     if (animationTimeoutRef.current) {
       clearTimeout(animationTimeoutRef.current);
     }
-    
+
     setCount((prev) => prev + multiplier);
     setTotalCount((prev) => prev + multiplier);
     setIsAnimating(true);
-    
+
     animationTimeoutRef.current = window.setTimeout(() => {
       setIsAnimating(false);
     }, 150);
-    
+
     if (soundEnabled) {
       const ctx = ensureAudioContext();
       playClickSound(ctx);
     }
-    
+
     // Trigger vibration based on strength
-    if (vibrationStrength !== "off" && navigator.vibrate) {
-      const duration = getVibrationDuration();
-      navigator.vibrate(duration);
+    if (vibrationEnabled && navigator.vibrate) {
+      navigator.vibrate(50);
     }
-  }, [soundEnabled, vibrationStrength, multiplier, getVibrationDuration, ensureAudioContext]);
+  }, [
+    soundEnabled,
+    vibrationEnabled,
+    multiplier,
+    ensureAudioContext,
+  ]);
 
   const decrement = useCallback(() => {
     if (count > 0) {
@@ -173,9 +191,28 @@ const TasbihCounter = () => {
   }, [count, multiplier]);
 
   const reset = useCallback(() => {
-    setCount(0);
-    setTotalCount(0);
-  }, []);
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current);
+    }
+
+    if (resetClickCount === 0) {
+      setCount(0);
+      setResetClickCount(1);
+      resetTimeoutRef.current = window.setTimeout(() => {
+        setResetClickCount(0);
+      }, 2000); // 2-second window for second click
+    } else {
+      setCount(0);
+      setTotalCount(0);
+      setResetClickCount(0);
+    }
+  }, [resetClickCount]);
+
+  const motionVariants = {
+    initial: { opacity: 0, y: shouldReduceMotion ? 0 : -20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: shouldReduceMotion ? 0 : 0.8 },
+  };
 
   return (
     <div className="relative flex flex-col items-center justify-center gap-8 p-6 w-full max-w-md mx-auto">
@@ -187,17 +224,16 @@ const TasbihCounter = () => {
         setMultiplier={setMultiplier}
         target={target}
         setTarget={setTarget}
-        vibrationStrength={vibrationStrength}
-        setVibrationStrength={setVibrationStrength}
+        vibrationEnabled={vibrationEnabled}
+        setVibrationEnabled={setVibrationEnabled}
       />
 
       {/* Title */}
-      <motion.h1 
-        className="text-4xl md:text-5xl font-serif font-normal tracking-wide text-gold drop-shadow-[0_0_15px_rgba(212,175,55,0.4)]"
+      <motion.h1
+        className="tasbih-title text-4xl md:text-5xl tracking-wide text-gold gold-inner-glow"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        style={{ fontFamily: "'Times New Roman', serif" }}
       >
         Tasbih
       </motion.h1>
@@ -205,13 +241,13 @@ const TasbihCounter = () => {
       {/* Main Counter Circle */}
       <motion.button
         onClick={increment}
-        className={`relative w-56 h-56 md:w-72 md:h-72 rounded-full glass-card flex items-center justify-center cursor-pointer select-none transition-all duration-300 ${
+        className={`relative w-56 h-56 md:w-72 md:h-72 rounded-full counter-glass flex items-center justify-center cursor-pointer select-none ${
           isAnimating ? "counter-pulse" : ""
-        } ${isComplete ? "ring-4 ring-gold/50" : ""}`}
+        } ${isComplete ? "ring-4 ring-gold/30" : ""}`}
         whileTap={{ scale: 0.97 }}
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.5, delay: 0.2 }}
       >
         {/* Progress Ring */}
         <svg
@@ -238,7 +274,7 @@ const TasbihCounter = () => {
             strokeDashoffset={289 - (289 * progress) / 100}
             initial={{ strokeDashoffset: 289 }}
             animate={{ strokeDashoffset: 289 - (289 * progress) / 100 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
           />
         </svg>
 
@@ -253,29 +289,32 @@ const TasbihCounter = () => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.2 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
             >
               {count}
             </motion.span>
           </AnimatePresence>
           <span className="text-sm text-muted-foreground mt-2">
-            of {target} {multiplier > 1 && <span className="text-gold">({multiplier}x)</span>}
+            of {target}{" "}
+            {multiplier > 1 && (
+              <span className="text-gold">({multiplier}x)</span>
+            )}
           </span>
         </div>
       </motion.button>
-
       {/* Controls */}
       <motion.div
         className="flex items-center gap-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.5, delay: 0.4 }}
       >
         {/* Decrement */}
         <button
           onClick={decrement}
           disabled={count === 0}
-          className="w-12 h-12 rounded-full glass-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-gold/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Decrement count"
+          className="w-12 h-12 rounded-full glass-card button-depth flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-gold/50 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <Minus className="w-5 h-5" />
         </button>
@@ -283,7 +322,8 @@ const TasbihCounter = () => {
         {/* Reset */}
         <button
           onClick={reset}
-          className="w-14 h-14 rounded-full glass-card flex items-center justify-center text-muted-foreground hover:text-gold hover:border-gold/50 transition-all"
+          aria-label="Reset count"
+          className="w-14 h-14 rounded-full glass-card button-depth flex items-center justify-center text-muted-foreground hover:text-gold hover:border-gold/50"
         >
           <RotateCcw className="w-6 h-6" />
         </button>
@@ -291,18 +331,18 @@ const TasbihCounter = () => {
         {/* Increment */}
         <button
           onClick={increment}
-          className="w-12 h-12 rounded-full glass-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-gold/50 transition-all"
+          aria-label="Increment count"
+          className="w-12 h-12 rounded-full glass-card button-depth flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-gold/50"
         >
           <Plus className="w-5 h-5" />
         </button>
       </motion.div>
-
       {/* Total Counter */}
       <motion.div
         className="text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.5, delay: 0.6 }}
       >
         <p className="text-xs text-muted-foreground uppercase tracking-wider">
           Total Dhikr
@@ -314,7 +354,7 @@ const TasbihCounter = () => {
 
       {/* Full Screen Completion Animation */}
       <AnimatePresence>
-        {isComplete && (
+        {!shouldReduceMotion && isComplete && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md cursor-pointer"
             initial={{ opacity: 0 }}
@@ -330,28 +370,28 @@ const TasbihCounter = () => {
               animate={{ scale: 2 }}
               transition={{ duration: 1.5, ease: "easeOut" }}
             />
-            
+
             {/* Particle effects */}
             {[...Array(12)].map((_, i) => (
               <motion.div
                 key={i}
                 className="absolute w-2 h-2 bg-gold rounded-full"
-                initial={{ 
-                  x: 0, 
-                  y: 0, 
+                initial={{
+                  x: 0,
+                  y: 0,
                   opacity: 1,
-                  scale: 1
+                  scale: 1,
                 }}
-                animate={{ 
-                  x: Math.cos(i * 30 * Math.PI / 180) * 200,
-                  y: Math.sin(i * 30 * Math.PI / 180) * 200,
+                animate={{
+                  x: Math.cos((i * 30 * Math.PI) / 180) * 200,
+                  y: Math.sin((i * 30 * Math.PI) / 180) * 200,
                   opacity: 0,
-                  scale: 0
+                  scale: 0,
                 }}
-                transition={{ 
-                  duration: 1.5, 
+                transition={{
+                  duration: 1.5,
                   delay: 0.3,
-                  ease: "easeOut"
+                  ease: "easeOut",
                 }}
               />
             ))}
@@ -361,28 +401,28 @@ const TasbihCounter = () => {
               className="text-center z-10"
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 200, 
+              transition={{
+                type: "spring",
+                stiffness: 200,
                 damping: 15,
-                delay: 0.2
+                delay: 0.2,
               }}
             >
               <motion.p
                 className="text-6xl md:text-8xl font-bold text-gold drop-shadow-[0_0_30px_rgba(212,175,55,0.8)]"
                 style={{ fontFamily: "'Amiri', 'Times New Roman', serif" }}
-                animate={{ 
+                animate={{
                   textShadow: [
                     "0 0 20px rgba(212,175,55,0.5)",
                     "0 0 40px rgba(212,175,55,0.8)",
-                    "0 0 20px rgba(212,175,55,0.5)"
-                  ]
+                    "0 0 20px rgba(212,175,55,0.5)",
+                  ],
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
                 سُبْحَانَ اللَّه
               </motion.p>
-              
+
               <motion.p
                 className="text-sm text-white/50 mt-8"
                 initial={{ opacity: 0 }}

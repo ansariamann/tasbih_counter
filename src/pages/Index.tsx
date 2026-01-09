@@ -1,12 +1,22 @@
+import { useState, useEffect } from "react";
 import TasbihCounter from "@/components/TasbihCounter";
 
 const Index = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Background Image */}
       <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(/kabah.jpg)` }}
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
+        style={{
+          backgroundImage: isLoaded ? `url(/kabah.jpg)` : 'none',
+          opacity: isLoaded ? 1 : 0
+        }}
       />
       
       {/* Overlay */}
