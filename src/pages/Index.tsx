@@ -29,7 +29,7 @@ const Index = () => {
           <small>
             Made by{" "}
             <a
-              href="https://ansariaman.netlify.app/"
+              href="https://linkedin.com/in/-aman-ansari"
               target="_blank"
               rel="noopener noreferrer"
               className="underline"
