@@ -29,7 +29,7 @@ const Index = () => {
           <small>
             Made by{" "}
             <a
-              href="https://linkedin.com/in/-aman-ansari"
+              href="https://www.linkedin.com/in/-aman-ansari"
               target="_blank"
               rel="noopener noreferrer"
               className="underline"
