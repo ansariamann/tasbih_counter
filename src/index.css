@@ -188,6 +188,10 @@ All colors MUST be HSL.
 @layer base {
   * {
     @apply border-border;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 
   body {

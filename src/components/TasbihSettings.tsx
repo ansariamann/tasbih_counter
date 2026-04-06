@@ -7,6 +7,7 @@ import {
   Target,
   Vibrate,
   X,
+  Info,
 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
@@ -39,6 +40,7 @@ const TasbihSettings = ({
   const [customMultiplier, setCustomMultiplier] = useState("");
   const [showCustomTarget, setShowCustomTarget] = useState(false);
   const [showCustomMultiplier, setShowCustomMultiplier] = useState(false);
+  const [showCredits, setShowCredits] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
   const handleCustomTarget = () => {
@@ -323,6 +325,42 @@ const TasbihSettings = ({
                       />
                     </button>
                   </div>
+                </div>
+
+                <div className="h-px bg-gold/10 my-6" />
+
+                {/* Credits */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => setShowCredits(!showCredits)}
+                    aria-label="Show credits"
+                    className="flex items-center gap-3 w-full text-left group"
+                  >
+                    <Info className={`w-5 h-5 transition-colors ${showCredits ? "text-gold" : "text-muted-foreground group-hover:text-gold"}`} />
+                    <span className="text-sm">Credits</span>
+                  </button>
+                  <AnimatePresence>
+                    {showCredits && (
+                      <motion.div
+                        className="mt-3 px-4 py-3 rounded-lg glass-card"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        <p className="text-sm text-muted-foreground">
+                          Made by{" "}
+                          <a
+                            href="https://linkedin.com/in/-aman-ansari"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gold hover:underline transition-all"
+                          >
+                            Aman Ansari
+                          </a>
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </motion.div>

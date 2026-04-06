@@ -25,19 +25,6 @@ const Index = () => {
       {/* Content */}
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center py-8">
         <TasbihCounter />
-        <footer className="absolute bottom-4 text-center text-xs text-white">
-          <small>
-            Made by{" "}
-            <a
-              href="https://linkedin.com/in/-aman-ansari"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-            >
-              Aman Ansari
-            </a>
-          </small>
-        </footer>
       </main>
     </div>
   );
