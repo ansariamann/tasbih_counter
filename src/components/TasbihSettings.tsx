@@ -72,7 +72,10 @@ const TasbihSettings = ({
     <>
       {/* Settings Toggle Button - Fixed position */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
         aria-label="Open settings"
         className="fixed top-6 right-6 w-10 h-10 flex items-center justify-center text-white/70 hover:text-gold transition-all z-30"
       >
@@ -89,7 +92,10 @@ const TasbihSettings = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
             />
 
             {/* Panel */}
@@ -100,6 +106,7 @@ const TasbihSettings = ({
               animate="animate"
               exit="exit"
               transition="transition"
+              onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-8">
