@@ -9,7 +9,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="relative min-h-[100dvh] w-full overflow-hidden">
       {/* Background Image */}
       <div
         className="fixed inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
@@ -23,7 +23,7 @@ const Index = () => {
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
 
       {/* Content */}
-      <main className="relative z-10 min-h-screen flex flex-col items-center justify-center py-8">
+      <main className="relative z-10 min-h-[100dvh] flex flex-col items-center justify-center py-8">
         <TasbihCounter />
       </main>
     </div>

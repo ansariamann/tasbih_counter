@@ -158,8 +158,13 @@ const TasbihCounter = () => {
       clearTimeout(animationTimeoutRef.current);
     }
 
-    setCount((prev) => prev + multiplier);
-    setTotalCount((prev) => prev + multiplier);
+    setCount((prev) => {
+      const nextCount = prev + multiplier;
+      if (prev < target && nextCount >= target) {
+        setTotalCount((t) => t + nextCount);
+      }
+      return nextCount;
+    });
     setIsAnimating(true);
 
     animationTimeoutRef.current = window.setTimeout(() => {
@@ -179,16 +184,22 @@ const TasbihCounter = () => {
     soundEnabled,
     vibrationEnabled,
     multiplier,
+    target,
     ensureAudioContext,
   ]);
 
   const decrement = useCallback(() => {
     if (count > 0) {
       const decrementValue = Math.min(count, multiplier);
-      setCount((prev) => prev - decrementValue);
-      setTotalCount((prev) => Math.max(0, prev - decrementValue));
+      setCount((prev) => {
+        const nextCount = prev - decrementValue;
+        if (prev >= target && nextCount < target) {
+          setTotalCount((t) => Math.max(0, t - prev));
+        }
+        return nextCount;
+      });
     }
-  }, [count, multiplier]);
+  }, [count, multiplier, target]);
 
   const reset = useCallback(() => {
     if (resetTimeoutRef.current) {
@@ -215,7 +226,7 @@ const TasbihCounter = () => {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center gap-8 p-6 w-full max-w-md mx-auto">
+    <div className="relative flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8 p-4 w-full max-w-md mx-auto">
       {/* Settings Menu */}
       <TasbihSettings
         soundEnabled={soundEnabled}
@@ -241,7 +252,7 @@ const TasbihCounter = () => {
       {/* Main Counter Circle */}
       <motion.button
         onClick={increment}
-        className={`relative w-56 h-56 md:w-72 md:h-72 rounded-full counter-glass flex items-center justify-center cursor-pointer select-none ${
+        className={`relative w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full counter-glass flex items-center justify-center cursor-pointer select-none ${
           isAnimating ? "counter-pulse" : ""
         } ${isComplete ? "ring-4 ring-gold/30" : ""}`}
         whileTap={{ scale: 0.97 }}
@@ -280,20 +291,16 @@ const TasbihCounter = () => {
 
         {/* Count Display */}
         <div className="flex flex-col items-center z-10">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={count}
-              className={`text-6xl md:text-8xl font-extralight ${
-                isComplete ? "text-gold" : "text-foreground"
-              } ${isAnimating ? "count-animate" : ""}`}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.2 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
-            >
-              {count}
-            </motion.span>
-          </AnimatePresence>
+          <motion.span
+            className={`text-6xl md:text-8xl font-extralight transition-colors duration-300 ${
+              isComplete ? "text-gold" : "text-foreground"
+            } ${isAnimating ? "count-animate" : ""}`}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+          >
+            {count}
+          </motion.span>
           <span className="text-sm text-muted-foreground mt-2">
             of {target}{" "}
             {multiplier > 1 && (

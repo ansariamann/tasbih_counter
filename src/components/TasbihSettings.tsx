@@ -54,7 +54,7 @@ const TasbihSettings = ({
 
   const handleCustomMultiplier = () => {
     const value = parseInt(customMultiplier, 10);
-    if (value > 0 && value <= 100) {
+    if (value > 0) {
       setMultiplier(value);
       setCustomMultiplier("");
       setShowCustomMultiplier(false);
@@ -162,6 +162,7 @@ const TasbihSettings = ({
                           type="number"
                           value={customTarget}
                           onChange={(e) => setCustomTarget(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleCustomTarget()}
                           placeholder="Enter target"
                           aria-label="Custom target value"
                           className="flex-1 px-3 py-2 rounded-lg glass-card text-sm bg-transparent border-gold/20 focus:border-gold/50 focus:outline-none"
@@ -231,11 +232,11 @@ const TasbihSettings = ({
                           type="number"
                           value={customMultiplier}
                           onChange={(e) => setCustomMultiplier(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleCustomMultiplier()}
                           placeholder="Enter value"
                           aria-label="Custom multiplier value"
                           className="flex-1 px-3 py-2 rounded-lg glass-card text-sm bg-transparent border-gold/20 focus:border-gold/50 focus:outline-none"
                           min="1"
-                          max="100"
                         />
                         <button
                           onClick={handleCustomMultiplier}
