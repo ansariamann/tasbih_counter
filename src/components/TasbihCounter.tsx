@@ -300,7 +300,7 @@ const TasbihCounter = () => {
         {/* Count Display */}
         <div className="flex flex-col items-center z-10">
           <motion.span
-            className={`text-6xl md:text-8xl font-extralight transition-colors duration-300 ${
+            className={`text-7xl md:text-9xl font-extralight transition-colors duration-300 ${
               isComplete ? "text-gold" : "text-foreground"
             } ${isAnimating ? "count-animate" : ""}`}
             initial={{ opacity: 0, scale: 0.8 }}
@@ -348,19 +348,7 @@ const TasbihCounter = () => {
             <RotateCcw className="w-6 h-6" />
           </button>
           
-          {/* Reset hint */}
-          <AnimatePresence>
-            {resetClickCount > 0 && totalCount > 0 && count === 0 && (
-              <motion.span 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="absolute -bottom-8 whitespace-nowrap text-[10px] text-red-400/80 uppercase tracking-widest"
-              >
-                Tap to reset total
-              </motion.span>
-            )}
-          </AnimatePresence>
+          
         </div>
       </motion.div>
       {/* Total Counter */}
