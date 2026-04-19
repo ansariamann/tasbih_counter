@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { RotateCcw, Minus, Plus } from "lucide-react";
+import { RotateCcw, Minus } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import TasbihSettings from "./TasbihSettings";
 
@@ -232,10 +232,7 @@ const TasbihCounter = () => {
   };
 
   return (
-    <div 
-      className="fixed inset-0 flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8 p-4 z-10 cursor-pointer select-none"
-      onClick={increment}
-    >
+    <div className="fixed inset-0 z-10 flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8 p-4 select-none">
       {/* Settings Menu */}
       <TasbihSettings
         soundEnabled={soundEnabled}
@@ -260,8 +257,10 @@ const TasbihCounter = () => {
 
       {/* Main Counter Circle */}
       <motion.button
-        onClick={(e) => { e.stopPropagation(); increment(); }}
-        className={`relative w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full counter-glass flex items-center justify-center cursor-pointer select-none ${
+        type="button"
+        onClick={increment}
+        aria-label="Increment count"
+        className={`relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-full counter-glass flex items-center justify-center cursor-pointer select-none ${
           isAnimating ? "counter-pulse" : ""
         } ${isComplete ? "ring-4 ring-gold/30" : ""}`}
         whileTap={{ scale: 0.97 }}
@@ -327,7 +326,7 @@ const TasbihCounter = () => {
       >
         {/* Decrement */}
         <button
-          onClick={(e) => { e.stopPropagation(); decrement(); }}
+          onClick={decrement}
           disabled={count === 0}
           aria-label="Decrement count"
           className="w-12 h-12 rounded-full glass-card button-depth flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-gold/50 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -338,7 +337,7 @@ const TasbihCounter = () => {
         {/* Reset */}
         <div className="relative flex flex-col items-center">
           <button
-            onClick={(e) => { e.stopPropagation(); reset(); }}
+            onClick={reset}
             aria-label="Reset count"
             className={`w-14 h-14 rounded-full glass-card button-depth flex items-center justify-center transition-colors ${
               resetClickCount > 0
@@ -363,15 +362,6 @@ const TasbihCounter = () => {
             )}
           </AnimatePresence>
         </div>
-
-        {/* Increment */}
-        <button
-          onClick={(e) => { e.stopPropagation(); increment(); }}
-          aria-label="Increment count"
-          className="w-12 h-12 rounded-full glass-card button-depth flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-gold/50"
-        >
-          <Plus className="w-5 h-5" />
-        </button>
       </motion.div>
       {/* Total Counter */}
       <motion.div
@@ -396,7 +386,7 @@ const TasbihCounter = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            onClick={(e) => { e.stopPropagation(); setCount(0); }}
+            onClick={() => setCount(0)}
           >
             {/* Glowing background effect */}
             <motion.div
@@ -485,14 +475,7 @@ const TasbihCounter = () => {
         )}
       </AnimatePresence>
 
-      <motion.p 
-        className="absolute bottom-6 left-0 right-0 text-center text-xs text-muted-foreground/40 tracking-[0.2em] uppercase pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 2 }}
-      >
-        Tap Anywhere to Count
-      </motion.p>
+      
     </div>
   );
 };
