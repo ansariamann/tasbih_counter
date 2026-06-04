@@ -32,6 +32,9 @@ const playClickSound = (audioContext: AudioContext | null) => {
   oscillator.stop(audioContext.currentTime + 0.05);
 };
 
+// Pre-allocate array for particle effects to avoid creation during render
+const PARTICLES = Array.from({ length: 12 }, (_, i) => i);
+
 // Create a gentle chime sound for completion
 const playChimeSound = (audioContext: AudioContext | null) => {
   if (!audioContext) return;
@@ -385,7 +388,7 @@ const TasbihCounter = () => {
             />
 
             {/* Particle effects */}
-            {[...Array(12)].map((_, i) => (
+            {PARTICLES.map((i) => (
               <motion.div
                 key={i}
                 className="absolute w-2 h-2 bg-gold rounded-full"
