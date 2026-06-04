@@ -12,11 +12,7 @@ const Index = () => {
     <div className="relative min-h-[100dvh] w-full overflow-hidden">
       {/* Background Image */}
       <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
-        style={{
-          backgroundImage: isLoaded ? `url(/kabah.jpg)` : 'none',
-          opacity: isLoaded ? 1 : 0
-        }}
+        className={`fixed inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 bg-[url('/mobile-bg.jpeg')] md:bg-[url('/kabah.jpg')] ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
       />
       
       {/* Overlay */}
